@@ -13,3 +13,14 @@ results
 
 npm-debug.log
 node_modules
+
+.idea/
+*.iml
+*.iws
+.DS_Store
+node_modules
+
+.gitmodules
+settings.json
+dumpjs.log
+dump.lock

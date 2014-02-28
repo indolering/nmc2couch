@@ -1,0 +1,3 @@
+[submodule "nmc.js"]
+	path = nmc.js
+	url = https://github.com/indolering/nmc.js.git
