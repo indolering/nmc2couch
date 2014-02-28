@@ -5,8 +5,9 @@ Scrapes Namecoin into CouchDB, fairly hackish at the moment.
 
 # Setup Instructions
 `nmc.js` first checks for a passed config object, then it checks for a local
-`settings.json` file and it finally falls back to __searching for the config file
-at `~/.namecoin/namecoin.conf`.__ This should "just work" on most Unix systems. *
+`nmc.js/settings.json` file and it finally falls back to __searching for the
+config file at `~/.namecoin/namecoin.conf`.__ This should "just work" on most
+Unix systems. *
 
 It dump.js assumes that you have a local CouchDB install which is world writable
 and it pushes everything into a DB called 'bit'.  This is currently hardcoded
@@ -22,11 +23,12 @@ or
 echo '{
    "host": "localhost",
    "port": 8334,
-   "user": "indolering",
-   "pass": "jkklsfjsfasadf89u8jr98j98pp9898"
+   "user": "YOUR USERNAME",
+   "pass": "YOUR PASSWORD"
  }
 ' > settings.json
 ````
 
 * It technically looks for the `/.namecoin/namecoin.conf` file in whatever
 directory is listed in the `process.env.HOME` variable.
+

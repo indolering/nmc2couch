@@ -3,7 +3,7 @@
  * @author indolering
  */
 
-'use strict'
+'use strict';
 
 var sugar = require('sugar');
 Object.extend();
@@ -32,6 +32,8 @@ var _ = require('underscore'),
   cradle = require('cradle'),
   db = new (cradle.Connection)().database('bit'),
   Promise = require('es6-promise').Promise,
+  namecoin = require('nmc.js'),
+  fs = require('fs'),
   namesTotal = 90000,
   scraped = 0,
   batchSize = 100,
@@ -39,47 +41,56 @@ var _ = require('underscore'),
   namesRegex = '^d/[a-z][a-z0-9-]{0,61}[a-z0-9]$',
   lastBlockCount = null,
   blockCount = null,
-  nmc;
-
+  nmcd;
 
 lockFile.lock('dump.lock', lockFreshness, function(er) {
   if (er && DEBUG) {
     winston.warn('Could not open lockfile!');
   } else {
+
     if (DEBUG) {
       winston.info("lock file set", {"user": process.getuid()});
     }
-    var namecoind = require('./nmc.js/nmc').init().then(function(nmcd) {
 
-      nmc = nmcd;
-
-      nmc.blockCount().then(function(value) {
-        blockCount = value;
-        db.get('$lastBlockCount', function(err, doc) {
-          if (err) {
-            lastBlockCount = blockCount - 36000; //all current blocks
-            db.save('$lastBlockCount', {"blocks": blockCount});
-          } else {
-            if (doc.blocks < 36000) {
-              lastBlockCount = blockCount - 36000;
-            } else {
-              lastBlockCount = doc.blocks - 6; //1 "hour" overlap between calls
-            }
-            db.save('$lastBlockCount', doc._rev, {"blocks": blockCount});
-          }
-
-          nmc.filter({regex: namesRegex, age: blockCount - lastBlockCount, start: 0, max: 0, stat: true})
-            .then(function(result) {
-              namesTotal = result.count;
-              nameDump();
-            });
-        });
-
-      });
+    fs.readFile('./settings.json', 'utf-8', function(err,data){
+      if (err) {
+        nmcd = namecoin.init().then(function(c){scrape(c)});
+      } else {
+        nmcd = namecoin.init(JSON.parse(data)).then(function(c){scrape(c)});
+      }
     });
   }
 });
 
+function scrape(n) {
+
+  //this is what happens when you mix thenable promises with regular callbacks.
+  nmcd = n;
+
+  nmcd.blockCount().then(function(value) {
+    blockCount = value;
+    db.get('$lastBlockCount', function(err, doc) {
+      if (err) {
+        lastBlockCount = blockCount - 36000; //all current blocks
+        db.save('$lastBlockCount', {"blocks": blockCount});
+      } else {
+        if (doc.blocks < 36000) {
+          lastBlockCount = blockCount - 36000;
+        } else {
+          lastBlockCount = doc.blocks - 6; //1 "hour" overlap between calls
+        }
+        db.save('$lastBlockCount', doc._rev, {"blocks": blockCount});
+      }
+
+      nmcd.filter({regex: namesRegex, age: blockCount - lastBlockCount, start: 0, max: 0, stat: true})
+        .then(function(result) {
+          namesTotal = result.count;
+          nameDump();
+        });
+    });
+
+  });
+}
 
 function expireBlock(expires) {
   return blockCount + expires;
@@ -142,7 +153,7 @@ function nameDump(regex, age, start, max) {
     'max'  : max || batchSize
   };
 
-  nmc.filter(args).then(function(names, err) {
+  nmcd.filter(args).then(function(names, err) {
     if (err) {
       console.log(err);
     } else if (names) {
@@ -160,7 +171,7 @@ function nameDump(regex, age, start, max) {
         if (DEBUG && err) {
           console.log(err);
         } else {
-//          console.log(res);
+          console.log(response);
           scraped = scraped + batchSize;
           var temp = Date.now();
           console.log(scraped + " " + Math.round(((temp - time) / 1000)));
@@ -208,7 +219,7 @@ function fixBatchConflicts(records) {
 
 function update(name) {
   return new Promise(function(resolve, reject) {
-    nmc.show(name).then(function(nmcRecord) {
+    nmcd.show(name).then(function(nmcRecord) {
       nmcRecord = scrubRecord(nmcRecord);
 
       if (nmcRecord) {
