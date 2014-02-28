@@ -19,5 +19,13 @@
   "bugs": {
     "url": "https://github.com/indolering/nmc2couch/issues"
   },
-  "homepage": "https://github.com/indolering/nmc2couch"
+  "homepage": "https://github.com/indolering/nmc2couch",
+  "dependencies": {
+    "lockfile": "^0.4.2",
+    "underscore": "^1.6.0",
+    "sugar": "^1.4.1",
+    "winston": "^0.7.2",
+    "cradle": "^0.6.7",
+    "es6-promise": "^0.1.1"
+  }
 }
