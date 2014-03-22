@@ -1,6 +1,6 @@
 {
   "name": "nmc2couch",
-  "version": "0.0.1",
+  "version": "0.2.1",
   "description": "Scrapes Namecoin into CouchDB, fairly hackish at the moment.",
   "main": "index.js",
   "scripts": {
