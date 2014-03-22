@@ -17,7 +17,7 @@ process.argv.forEach(function(val, index, array) {
 
 var winston = require('winston');
 winston.add(winston.transports.File, {
-  filename        : 'dumpjs.log',
+  filename        : 'nmc2couch.log',
   handleExceptions: !DEBUG
 });
 
@@ -43,7 +43,7 @@ var _ = require('underscore'),
   blockCount = null,
   nmcd;
 
-lockFile.lock('dump.lock', lockFreshness, function(er) {
+lockFile.lock('nmc2couch.lock', lockFreshness, function(er) {
   if (er && DEBUG) {
     winston.warn('Could not open lockfile!');
   } else {
@@ -208,7 +208,7 @@ function nameDump(regex, age, start, max) {
               winston.info("finished.");
             }
 
-            lockFile.unlock('some-file.lock', function(er) {
+            lockFile.unlock('nmc2couch.lock', function(er) {
               console.log(er);
               if (DEBUG) {
                 winston.warn(er);

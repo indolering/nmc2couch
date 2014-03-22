@@ -3,6 +3,6 @@
   "user"  : "",
   "pass"  : "",
   "secure": false,
-  "port"  : "80",
+  "port"  : "5984",
   "uri"   : ""
 }

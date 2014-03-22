@@ -9,9 +9,13 @@ nmc2couchdb scrapes valid, non-expired Namecoin names blockchain into CouchDB. f
 
 You can install nmc2couch using Git:
 
-`git clone https://github.com/indolering/nmc2couch.git`
+```
+git clone https://github.com/indolering/nmc2couch.git
+cd nmc2couch
+npm install
+```
 
-or via NPM:
+or via NPM (note the default config requirements):
 
 `sudo npm install --global nmc2couch`
 
