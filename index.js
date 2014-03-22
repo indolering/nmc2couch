@@ -54,6 +54,7 @@ lockFile.lock('nmc2couch.lock', lockFreshness, function(er) {
 
     fs.readFile('./couchdb-settings.json', 'utf-8', function(err,data){
       if (!err) {
+        data = JSON.parse(data);
         var database = data.dbname || 'bit';
         if (database === "") {
           database = "bit";
