@@ -2,7 +2,7 @@
   "dbname": "bit",
   "user"  : "",
   "pass"  : "",
-  "secure": false,
+  "https": false,
   "port"  : "5984",
-  "uri"   : ""
+  "host"   : "127.0.0.1"
 }

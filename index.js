@@ -30,7 +30,7 @@ if (DEBUG) {
 
 var _ = require('underscore'),
   cradle = require('cradle'),
-  db = new (cradle.Connection)().database('bit'),
+  db = null,
   Promise = require('es6-promise').Promise,
   namecoin = require('nmc.js'),
   fs = require('fs'),
@@ -43,37 +43,78 @@ var _ = require('underscore'),
   blockCount = null,
   nmcd;
 
+function setupDB() {
+  return new Promise(function(resolve, reject) {
+    var connection;
+    fs.readFile('./couchdb-settings.json', 'utf-8', function(err, data) {
+      if (!err) {
+        data = JSON.parse(data);
+
+        var dbname = data.dbname || "bit",
+          host  = data.host || '127.0.0.1',
+          https = data.https || false,
+          port  = data.port || 5984,
+          vars = null;
+
+
+        if (dbname === "") {
+          dbname = "bit";
+        }
+
+        if (data.https || data.user || data.pass) {
+          vars = {};
+
+          if (data.https) {
+            vars['secure'] = https;
+          }
+
+          if ((data.user && (data.user !== "")) ||
+            (data.pass && (data.pass !== ""))) {
+            vars['auth'] = {};
+
+            if (data.user && (data.user !== "")) {
+              vars.auth['username'] = data.user;
+            }
+
+            if (data.pass && (data.pass !== "")) {
+              vars.auth['password'] = data.pass;
+            }
+          }
+        }
+
+        if (vars !== null) {
+          connection = new (cradle.Connection)(host, port, vars);
+        } else {
+          connection = new (cradle.Connection)(host, port);
+        }
+
+        db = connection.database(dbname);
+
+      } else {
+        db = new(cradle.Connection)().database('bit');
+      }
+
+      if (db) {
+        resolve();
+      } else {
+        winston.error('Could not create DB',db, data, err);
+        reject();
+      }
+    });
+  });
+}
+  //  db = new (cradle.Connection)().database('bit');
+
 lockFile.lock('nmc2couch.lock', lockFreshness, function(er) {
   if (er && DEBUG) {
     winston.warn('Could not open lockfile!');
   } else {
 
     if (DEBUG) {
-      winston.info("lock file set", {"user": process.getuid()});
+      winston.info("lockfile set", {"user": process.getuid()});
     }
 
-    fs.readFile('./couchdb-settings.json', 'utf-8', function(err,data){
-      if (!err) {
-        data = JSON.parse(data);
-        var database = data.dbname || 'bit';
-        if (database === "") {
-          database = "bit";
-        }
-
-        if (data.uri && (data.uri ==! "")) {
-          if (data.https) {
-            database = "https://" + database;
-          } else {
-            database = "http://" + database;
-          }
-        }
-
-        db = new (cradle.Connection)(database, data.port, {
-          secure: data.https,
-          auth: { username: data.user, password: data.pass }
-        });
-      }
-    });
+    setupDB();
 
     fs.readFile('./namecoin-settings.json', 'utf-8', function(err,data){
       if (err) {
