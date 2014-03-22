@@ -4,5 +4,5 @@
   "pass"  : "",
   "secure": false,
   "port"  : "80",
-  "uri"   : "localhost"
+  "uri"   : ""
 }
