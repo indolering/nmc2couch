@@ -21,6 +21,7 @@ node_modules
 node_modules
 
 .gitmodules
-settings.json
+namecoin-settings.json
 dumpjs.log
 dump.lock
+couchdb-settings.json

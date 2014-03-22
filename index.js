@@ -52,7 +52,29 @@ lockFile.lock('dump.lock', lockFreshness, function(er) {
       winston.info("lock file set", {"user": process.getuid()});
     }
 
-    fs.readFile('./settings.json', 'utf-8', function(err,data){
+    fs.readFile('./couchdb-settings.json', 'utf-8', function(err,data){
+      if (!err) {
+        var database = data.dbname || 'bit';
+        if (database === "") {
+          database = "bit";
+        }
+
+        if (data.uri && (data.uri ==! "")) {
+          if (data.https) {
+            database = "https://" + database;
+          } else {
+            database = "http://" + database;
+          }
+        }
+
+        db = new (cradle.Connection)(database, data.port, {
+          secure: data.https,
+          auth: { username: data.user, password: data.pass }
+        });
+      }
+    });
+
+    fs.readFile('./namecoin-settings.json', 'utf-8', function(err,data){
       if (err) {
         nmcd = namecoin.init().then(function(c){scrape(c)});
       } else {

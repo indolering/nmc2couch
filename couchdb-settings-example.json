@@ -1,0 +1,8 @@
+{
+  "dbname": "bit",
+  "user"  : "",
+  "pass"  : "",
+  "secure": false,
+  "port"  : "80",
+  "uri"   : "localhost"
+}
