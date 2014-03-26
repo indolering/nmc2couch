@@ -1,7 +1,7 @@
 nmc2couchdb
 ===========
 
-nmc2couchdb scrapes valid, non-expired Namecoin names blockchain into CouchDB. fairly hackish at the moment.
+nmc2couchdb scrapes valid, non-expired Namecoin names blockchain into CouchDB.
 
 ## Init
 
