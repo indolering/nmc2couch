@@ -27,7 +27,8 @@
     "winston": "^0.7.2",
     "cradle": "^0.6.7",
     "es6-promise": "^0.1.1",
-    "nmc.js": "^0.2.0"
+    "nmc.js": "^0.2.0",
+    "namecoin": "^0.1.4"
   },
   "devDependencies": {
     "gulp": "^3.5.6",
