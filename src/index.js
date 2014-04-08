@@ -6,24 +6,33 @@
 'use strict';
 //imports
 var fs = require('fs'),
-  Promise = require('es6-promise').Promise,
-  Namecoin = require('./libs/nmc.js/nmc'),
-  couchdb = require('./libs/couch');
+    Promise = require('es6-promise').Promise;
+
+
+
+//globals
+var namesTotal = 90000,
+    scraped = 0,
+    batchSize = 100,
+    time = Date.now(),
+    namesRegex = '^d/[a-z][a-z0-9-]{0,61}[a-z0-9]$';
+
+
 
 //setup imports
 var sugar = require('sugar');
 Object.extend();
 
-var DEBUG = false;
-var verify = false;
-var lastBlockCount = null;
-process.argv.forEach(function(val, index, array) {
-
-  if (val.startsWith('--block=')) {
-    lastBlockCount = val.split('=')[1].toNumber();
-  } else if (val.endsWith('debug')) {
+var DEBUG = false, verify = false;
+//var lastBlockCount = null;
+process.argv.forEach(function(val, index, array){
+//
+//  if (val.startsWith('--block=')) {
+//    lastBlockCount = val.split('=')[1].toNumber();  //TODO: move to getLastBlockCount()
+//  } else
+  if (val.endsWith('debug')){
     DEBUG = true;
-  } else if (val.endsWith('verify')) {
+  } else if (val.endsWith('verify')){ //TODO: move to getLastBlockCount()
     verify = true;
   }
 });
@@ -36,33 +45,25 @@ winston.add(winston.transports.File, {
 
 var lockFile = require('lockfile');
 var lockFreshness = { stale: 3600000 }; //one hour
-if (DEBUG) {
+if (DEBUG){
   lockFreshness.stale = 1;
 }
 
-//globals
-var namesTotal = 90000,
-  scraped = 0,
-  batchSize = 100,
-  time = Date.now(),
-  namesRegex = '^d/[a-z][a-z0-9-]{0,61}[a-z0-9]$',
-  lastBlockCount, blockCount, couch, nmc;
+lockFile.lock('nmc2couch.lock', lockFreshness, function(err){ //then this?
+  if (!err){
+    if (DEBUG) winston.info("lockfile set", {"user": process.getuid()});
+    Promise.all([initCouch(),initNamecoin()]).then(function(response){
+      console.log("got to promise.all", response);
+      //get blocks since lastBlock and blockCount.then(function(count) {
+        //update loop
+   // })
+    }).catch(function(err){
+      winston.error(err);
+    })
 
-
-lockFile.lock('nmc2couch.lock', lockFreshness, function(err) { //then this?
-  if (!err) {
-    start();
-
-    if (DEBUG) {
-      winston.info("lockfile set", {"user": process.getuid()});
-    }
-
-  } else if (err & DEBUG) {
-    winston.error('Could not open lockfile!');
-  }
+  } else if (DEBUG) winston.error('Could not open lockfile!', err);
 });
 
-// Connect couch
 //   Set last block from CouchDB
 //   Connect NMC;
 //   Get count since last block.then(){
@@ -72,59 +73,65 @@ lockFile.lock('nmc2couch.lock', lockFreshness, function(err) { //then this?
 // update CouchDB of current block
 // remove locks
 //}
-
-function start() {
-  setup('couchdb-settings.json', couchdb).then(function(client) {
-    couch = client;
-    if (!lastBlockCount) {
-      couch.getLastBlockCount().then(function(count) {
-        lastBlockCount = count;
-      })
-    }
-    return setup('namecoin-settings.json', Namecoin);
-  }).then(function(n) {
-    nmc = n;
-    //blockCount()
-    //getNamesSince
-    //return batchUpdate;
-  }).then(function(count) {
-    lastBlockCount = count;
-    return setup('namecoin-settings.json', nmc);
-  }).catch(winston.error)
-//      .finally(function() {
-//        lockFile.unlock('nmc2couch.lock', function(er) {
-//          console.log(er);
-//          if (DEBUG) {
-//            winston.warn(er);
-//          }
+//promise.all(couchdb and namecoin)
+// .then(function(Couchdb and Namecoind){
+// set nmc;
+// set db;
+// promise.all(getLastBlock and getBlockCount)
+// .then(function(lastBlock, blockCount){
 //
-//        });
-//      });
-}
+// })
+//
+//
+// }
+//
+//nmc
+//
 
-function setup(path, utilObject) {
-  return new Promise(function(resolve, reject) {
-    var conf = {};
-    fs.readFile(path, 'utf-8', function(err, data) {
-      if (!err) {
-        conf = JSON.parse(data);
+//init CouchDB
+var couchdb = require('./libs/couch'), db, lastBlockCount;
+function initCouch(){
+  return new Promise(function(resolve, reject){
+    couchdb.init(process.cwd() + '/couchdb-settings.json', function(err, DB){
+      if (err){
+        reject(err);
+      } else {
+        if (DEBUG) winston.info("couchdb initialized");
+        db = DB;
+        setLastBlockCount(resolve, reject);
       }
-      utilObject.init(conf, function(err, client) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(client);
-        }
-      });
-    });
+    })
   });
 }
 
-
-function getCurrentBlock() {
-  return new Promise(function(resolve, reject) {
-
+function setLastBlockCount(resolve, reject){
+  db.getLastBlockCount().then(function(count){
+    lastBlockCount = count;
+    if (DEBUG) winston.info("retrieved last block count: " + count);
+    resolve();
+  }).catch(function(err){
+    reject(err);
   });
+}
+
+//init Namecoin
+var namecoin = require('./libs/nmc.js/nmc'), blockCount, nmc;
+function initNamecoin(){
+  return new Promise(function(resolve, reject){
+    namecoin.init({"user":"user", "pass":"pass"}, function(err, NMC){
+      if (err){
+        reject(err);
+      } else {
+        if (DEBUG) winston.info("Initialized Namecoin:", NMC);
+        nmc = NMC;
+        setBlockCount(resolve, reject);
+      }
+    })
+  })
+}
+
+function setBlockCount(resolve, reject){
+
 }
 
 
@@ -136,19 +143,19 @@ function getCurrentBlock() {
 //////If not the same, update
 
 
-function scrape(n) {
+function scrape(n){
 
   //this is what happens when you mix thenable promises with regular callbacks.
   nmc = n;
 
-  nmc.blockCount().then(function(value) {
+  nmc.blockCount().then(function(value){
     blockCount = value;
-    db.get('$lastBlockCount', function(err, doc) {
-      if (err) {
+    db.get('$lastBlockCount', function(err, doc){
+      if (err){
         lastBlockCount = blockCount - 36000; //all current blocks
         db.save('$lastBlockCount', {"blocks": blockCount});
       } else {
-        if (doc.blocks < 36000) {
+        if (doc.blocks < 36000){
           lastBlockCount = blockCount - 36000;
         } else {
           lastBlockCount = doc.blocks - 6; //1 "hour" overlap between calls
@@ -157,7 +164,7 @@ function scrape(n) {
       }
 
       nmcd.filter({regex: namesRegex, age: blockCount - lastBlockCount, start: 0, max: 0, stat: true})
-        .then(function(result) {
+        .then(function(result){
           namesTotal = result.count;
           nameDump();
         });
@@ -166,12 +173,12 @@ function scrape(n) {
   });
 }
 
-function expireBlock(expires) {
+function expireBlock(expires){
   return blockCount + expires;
 }
 
 
-function nameDump(regex, age, start, max) {
+function nameDump(regex, age, start, max){
 
   var args = {
     'regex': regex || '^d/[a-z][a-z0-9-]{0,61}[a-z0-9]$',
@@ -180,22 +187,22 @@ function nameDump(regex, age, start, max) {
     'max'  : max || batchSize
   };
 
-  nmcd.filter(args).then(function(names, err) {
-    if (err) {
+  nmcd.filter(args).then(function(names, err){
+    if (err){
       console.log(err);
-    } else if (names) {
+    } else if (names){
       var batch = [];
-      while (names.length > 0) {
+      while (names.length > 0){
         var record = names.pop();
 
-        if (record && record.value !== "") {
+        if (record && record.value !== ""){
           record = cleanRecord(record);
           batch.push({'_id': record.name, 'value': record.value});
         }
 
       }
-      db.save(batch, function(err, response) {
-        if (DEBUG && err) {
+      db.save(batch, function(err, response){
+        if (DEBUG && err){
           console.log(err);
         } else {
           console.log(response);
@@ -206,16 +213,16 @@ function nameDump(regex, age, start, max) {
 
           fixBatchConflicts(response);
 
-          if (namesTotal > scraped) {
+          if (namesTotal > scraped){
             nameDump();
           } else {
-            if (DEBUG) {
+            if (DEBUG){
               winston.info("finished.");
             }
 
-            lockFile.unlock('nmc2couch.lock', function(er) {
+            lockFile.unlock('nmc2couch.lock', function(er){
               console.log(er);
-              if (DEBUG) {
+              if (DEBUG){
                 winston.warn(er);
               }
 
@@ -229,12 +236,12 @@ function nameDump(regex, age, start, max) {
 }
 
 
-function fixBatchConflicts(records) {
+function fixBatchConflicts(records){
 
-  if (records.length > 0) {
+  if (records.length > 0){
     var record = records.pop();
-    if (Object.has(record, 'error') && record.error === 'conflict') {
-      update(record.id).then(function() {
+    if (Object.has(record, 'error') && record.error === 'conflict'){
+      update(record.id).then(function(){
         fixBatchConflicts(records);
       });
     } else {
@@ -244,40 +251,40 @@ function fixBatchConflicts(records) {
 
 }
 
-function update(name) {
-  return new Promise(function(resolve, reject) {
-    nmcd.show(name).then(function(nmcRecord) {
+function update(name){
+  return new Promise(function(resolve, reject){
+    nmcd.show(name).then(function(nmcRecord){
       nmcRecord = scrubRecord(nmcRecord);
 
-      if (nmcRecord) {
-        db.get(name, function(err, doc) {
-          if (err) {
+      if (nmcRecord){
+        db.get(name, function(err, doc){
+          if (err){
             db.save(name, nmcRecord.value); //add resolve/reject
-          } else if (typeof doc !== 'undefined') {
+          } else if (typeof doc !== 'undefined'){
 
             var cleanDoc = scrubRecord({name: name, value: doc.json});
 
             var keys = nmcRecord.value.keys();
             var same = true;
-            keys.forEach(function(key) {
-              if (!key.startsWith('_') && !key.startsWith('$')) {
-                if (!Object.equal(cleanDoc[key], nmcRecord[key])) {
+            keys.forEach(function(key){
+              if (!key.startsWith('_') && !key.startsWith('$')){
+                if (!Object.equal(cleanDoc[key], nmcRecord[key])){
                   same = false;
                 }
               }
             });
 
 
-            if (same) {
-              if (DEBUG) {
+            if (same){
+              if (DEBUG){
                 console.log(name + " is already up to date");
               }
               resolve(true);
 
 
             } else {
-              db.save(name, doc._rev, nmcRecord.value, function(error, response) {
-                if (error && DEBUG) {
+              db.save(name, doc._rev, nmcRecord.value, function(error, response){
+                if (error && DEBUG){
                   console.log(name + " failed to update",
                     JSON.stringify(error));
                   winston.warn(name + " failed to update", error);
@@ -285,7 +292,7 @@ function update(name) {
                   reject(error);
                 } else {
                   console.log(name + " updated");
-                  if (DEBUG) {
+                  if (DEBUG){
                     winston.info(name + " updated");
                   }
                   resolve(response);
@@ -295,7 +302,7 @@ function update(name) {
 
           }
           else {
-            if (DEBUG) {
+            if (DEBUG){
               console.log("no error but not updated: "
                 + JSON.stringify(doc));
             }

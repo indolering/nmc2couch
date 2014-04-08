@@ -6,14 +6,17 @@
 'use strict';
 var cradle = require('cradle');
 var Promise = require('es6-promise').Promise;
+var fs = require('fs');
 
-function couch(conf, callback) {
+var DEBUG = false;
+process.argv.forEach(function(val, index, array){
+  if (val.endsWith('debug')) DEBUG = true;
+});
 
-  try {
-    var db = initConnection(conf);
-  } catch (e) {
-    reject(e);
-  }
+function couch(client, callback) {
+
+
+  var db = client;
 
   var c = this;
 
@@ -83,16 +86,15 @@ function couch(conf, callback) {
         setInterval(c.heart.ping, 1000);
         callback(null, c);
       } else {
-        callback(err, null);
+        callback(err);
       }
     }
   });
 }
 
-function initConnection(conf) {
+function initConnection(data) {
 
-  var connection = null;
-  var conf = conf || {};
+  var conf = JSON.parse(data);
 
   conf.uri = conf.uri || "http://localhost:5984";
   conf.dbname = conf.dbname || "namecoin";
@@ -105,14 +107,12 @@ function initConnection(conf) {
     if (conf.password) {
       auth.password = conf.password;
     }
-    connection = new (cradle.Connection)(conf.uri, {
+    return new (cradle.Connection)(conf.uri, {
       'auth'  : auth
     }).database(conf.dbname);
   } else {
-    connection = new (cradle.Connection)(conf.uri).database(conf.dbname);
+    return new (cradle.Connection)(conf.uri).database(conf.dbname);
   }
-
-  return connection;
 }
 
 /**
@@ -132,7 +132,16 @@ function initConnection(conf) {
  * @param {?config} conf Object with settings.
  * @returns {(Promise.<nmc> | nmc)}
  */
-exports.init = function(conf, callback) {
-  new couch(conf, callback);
+exports.init = function(path, callback) {
+
+  fs.readFile(path, 'utf-8', function(err, data){
+    if (!err){
+      if (DEBUG) console.info(path + " found!");
+      return new couch(initConnection(data), callback);
+    } else {
+      callback(new Error("Failed to find " + path + " :", err));
+    }
+  });
+
 };
 
