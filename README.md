@@ -1,7 +1,7 @@
-nmc2couchdb
-===========
+nmc2couch
+=========
 
-nmc2couchdb scrapes valid, non-expired Namecoin names blockchain into CouchDB.
+nmc2couch scrapes valid, non-expired Namecoin names blockchain into CouchDB.
 
 ## Init
 
@@ -38,7 +38,7 @@ or just use this one-liner while in the project directory:
 ````
 echo '{
    "host": "localhost",
-   "port": 8334,
+   "port": 8336,
    "user": "YOUR USERNAME",
    "pass": "YOUR PASSWORD"
  }

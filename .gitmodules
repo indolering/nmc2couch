@@ -1,3 +1,6 @@
 [submodule "nmc.js"]
 	path = nmc.js
 	url = https://github.com/indolering/nmc.js.git
+[submodule "src/libs/nmc.js"]
+	path = src/libs/nmc.js
+	url = https://github.com/indolering/nmc.js.git
