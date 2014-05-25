@@ -188,7 +188,7 @@ function makePouch(type){
   })
 
   function randName(){
-    var text = "";
+    var text = "TEMP";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     for( var i=0; i < 5; i++ )

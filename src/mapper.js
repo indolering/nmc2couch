@@ -51,7 +51,15 @@ function map(doc, emit, rejectify) {
         "1.0.0.0",
         "1.2.3.4",
         "70.79.76.3",
-        "bitcoinbookkeeper.com"
+        "bitcoinbookkeeper.com",
+        "garle.se",
+        "94.71.158.121",
+        "84.122.135.197",
+        "69.65.34.10",
+        "27.33.60.98",
+        "212.187.124.93",
+        "164.138.28.170",
+        "162.243.56.54"
       ];
 
       return squatters.some(function (squatter) {

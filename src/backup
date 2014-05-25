@@ -45,7 +45,11 @@ function(doc) {
       var squatters = [
         "91.250.85.116",
         "73.239.23.14",
-        "212.232.51.96"
+        "212.232.51.96",
+        "1.0.0.0",
+        "1.2.3.4",
+        "70.79.76.3",
+        "bitcoinbookkeeper.com"
       ];
 
       return squatters.some(function (squatter) {
@@ -105,7 +109,7 @@ function(doc) {
   /*
    * This is a rather convoluted piece of logic due to trying to operate in 3 environments:
    * if( doc -> Are you running as part of a Mapper = require('mapper') // map = new Mapper.map()  statement?
-   * && !doc.error -> Did nmc2couch.js find an error PRIOR to adding it to CouchDB?
+   * && !doc.error -> Did nmc2couch.js find an error while trying to parse record PRIOR to adding it to CouchDB?
    * && doc.namespace -> Are you part of the 'd' namespace?
    * && that.validName(doc.name) -> is your name valid for this namespace?
    *
@@ -117,7 +121,9 @@ function(doc) {
     if (entry !== false) {
       emit(doc.name, {"http": entry});
     } else if (rejectify && (entry === false)) { //are you being called as part of a unit test NOT in CouchDB?
-      rejectify(false);
+      rejectify("value");
     }
+  } else if (rejectify) { //are you being called as part of a unit test NOT in CouchDB?
+    rejectify("name");
   }
 }
