@@ -1,0 +1,24 @@
+[
+  {
+    "_id": "d/wikileaks",
+    "_rev": "1-9610dee455eb2ce5c4517dd21da28772",
+    "name": "wikileaks",
+    "isgood" : true,
+    "value": {
+      "map": {
+        "": "195.35.109.44"
+      }
+    },
+    "expires": 211054,
+    "namespace": "d"
+  },
+  {
+    "_id": " d/ip-8888",
+    "_rev": "1-9610dee455eb2ce5c4517dd21da28776",
+    "name": "ip-8888",
+    "isgood" : true,
+    "namespace": "d",
+    "value": {"ip": "8.8.8.8"},
+    "expires": 192749
+  }
+]

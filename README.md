@@ -22,31 +22,16 @@ or via NPM (note the default config requirements):
 
 ### Setup
 
-#### Specify JSON RPC settings
-`nmc.js` first checks for a passed config object, then it checks for a local
-`nmc.js/namecoin-settings.json` file and it finally falls back to __searching for the
-config file at `~/.namecoin/namecoin.conf`.__ This should "just work" on most
-Unix systems. *
+#### Namecoin JSON RPC settings
+Namecoin will eventually remove the username/password requirements for name_show and other read-only operations.  For
+now, the following RPC settings are hardcoded into nmc2Couch.  In the future, I might enable changing host/port but
+there is no reason to run nmc2couch against a Namecoind instance with an account balance.
 
-You can create the local `./namecoin-settings.json` thusly:
+      host: 'localhost',
+      port: 8336,
+      user: 'user',
+      pass: 'pass'
 
-1. `cp namecoin-settings-example.json namecoin-settings.json`
-2. Fill in config information in `namecoin-settings.json`
-
-or just use this one-liner while in the project directory:
-
-````
-echo '{
-   "host": "localhost",
-   "port": 8336,
-   "user": "YOUR USERNAME",
-   "pass": "YOUR PASSWORD"
- }
-' > namecoin-settings.json
-````
-
-* It technically looks for the `/.namecoin/namecoin.conf` file in whatever
-directory is listed in the `process.env.HOME` variable.
 
 #### Specify CouchDB settings
 By default, nmc2couch assumes that you have a local CouchDB install which is
