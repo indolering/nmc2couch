@@ -1,7 +1,7 @@
 {
   "dbname": "namecoin",
   "user"  : "nmc",
-  "pass"  : "password",
+  "pass"  : "pass",
   "secure": false,
   "port"  : "5984",
   "host"   : "127.0.0.1"
