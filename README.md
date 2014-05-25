@@ -23,6 +23,19 @@ or via NPM (note the default config requirements):
 
 ### Setup
 
+1. Create a namecoin database in your CouchDB install.
+2. Run `nmc2couch.js --verify --debug` to init the database with all current domains.
+3. Couch your CouchDB install to ensure that all of the domains were copied over (there should be >100,000).
+4. Add the following cron job:
+
+`10	*	*	*	*	nodejs /home/ubuntu/nmc2couch/src/nmc2couch.js`
+
+This cron job will check the past 100 blocks every 10 minutes.  As a new block should be found ~10 minutes, this should
+ensure that your database is within one or two blocks of the current blockchain length.  100 blocks are checked in case 
+your client was on a chain which was discarded.  100 blocks is total overkill and can be trimmed down if you are on a
+very slow machine.
+
+### Authorization
 Namecoin and CouchDB should be run on an isolated instance with http and RPC access restricted to local network
 connections only.  CouchDB should perform a one-way replication to another CouchDB install running on a local instance
  which itself is accessible from the outside.
