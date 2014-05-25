@@ -2,7 +2,7 @@
 var Promise = require("bluebird"),
   Sugar = require('sugar'),
   PouchDB = require('pouchdb'),
-  db = new PouchDB(randString()+'db'),
+  db = new PouchDB(randString()+'db', {db : require('memdown')}),
   Namecoin = require("namecoin"),
   nmc = new Namecoin.Client({
     host: 'localhost',
@@ -116,11 +116,13 @@ function update(names, blockcount, date) {
 
   }
 
-  if (DEBUG) winston.info("Updated " + i + " names!");
+  if (DEBUG) winston.info("Processed " + i + " names!");
 
   db.bulkDocs(names).then(function(results) {
+    if (DEBUG) winston.info("Attempting to update couchDB ");
     return db.replicate.to('http://localhost:5984/namecoin');
   }).then(function (response) {
+    if (DEBUG) winston.info("Attempting to update couchDB ");
     return db.destroy();
   }).then(function (info) {
     winston.log("Updated Complete");
