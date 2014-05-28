@@ -4,6 +4,15 @@ nmc2couch
 nmc2couch scrapes valid, non-expired Namecoin names blockchain into CouchDB.  It also has a script for CouchDB which
 filters invalid domain records.
 
+#Warning
+I made a few errors in my assumptions of the CouchDB data model so I had to hack a solution together.  The codebase now
+needs a major refactoring but here is the short version:
+
+* nmc2couch pushes full Namecoin records into a database named 'namecoin' .
+* nmc2speech pushes transformed versions of Namecoin records which pass various checks into a database named 'speech'.
+
+Both should just work if you use them.
+
 ## Init
 
 ### Install
