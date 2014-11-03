@@ -13,18 +13,17 @@ needs a major refactoring but here is the short version:
 
 Both should "just work" if you use them.
 
-Cronjobs that offset the execution of each command.
+Before setting up your crontab below, test commands by appending --debug.  If you get a connection warning, check to make su re ~/namecoin.conf has the correct username settings and ensure that namecoind is running.
+
 ```
+# Offset the execution of each batch.
 0,10,20,30,40,50 * * * * node /opt/nmc2couch/src/nmc2couch.js >/dev/null 2>&1
 5,15,25,35,45,55 * * * * node /opt/nmc2couch/src/nmc2speech.js >/dev/null 2>&1
-```
 
-Once daily full reread
-```
+# Once daily full reread.  Basically overkill
 49 0 * * * node /opt/nmc2couch/src/nmc2couch.js --verify >/dev/null 2>&1
 4 0 * * * node /opt/nmc2couch/src/nmc2speech.js --verify >/dev/null 2>&1
 ```
-
 
 ## Init
 
@@ -70,10 +69,18 @@ Namecoin will eventually remove the username/password requirements for name_show
 now, the following RPC settings are hardcoded into nmc2Couch.  In the future, I might enable changing host/port but
 there is no reason to run nmc2couch against a Namecoind instance with an account balance.
 
-      host: 'localhost',
-      port: 8336,
-      user: 'user',
-      pass: 'pass'
+  host: 'localhost',
+  port: 8336,
+  user: 'user',
+  pass: 'pass'
+
+C/P namecoin.conf: 
+```
+rpcuser=user
+rpcpassword=pass
+rpcport=8336
+daemon=1
+```
 
 
 #### Specify CouchDB settings
