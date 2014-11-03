@@ -56,6 +56,14 @@ or via NPM (note the default config requirements):
 This cron job will check the past 100 blocks every 10 minutes.  As a new block should be found ~10 minutes, this should
 ensure that your database is within one or two blocks of the current blockchain length.  100 blocks are checked in case 
 your client was on a chain which was discarded.  100 blocks is total overkill and can be trimmed down to 10 or even 5 you are on a very slow machine.
+#### CouchDB Notes
+Now I'm just abusing this for storing my own setup notes.
+
+Setup replication from prive to public CouchDB 
+
+http://couchUser:couchPass@address:5984/speech
+
+
 
 ### Troubleshooting
 Make sure ~/.namecoin/namecoin.conf has the correct username settings.
