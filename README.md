@@ -11,13 +11,25 @@ needs a major refactoring but here is the short version:
 * nmc2couch pushes full Namecoin records into a database named 'namecoin' .
 * nmc2speech pushes transformed versions of Namecoin records which pass various checks into a database named 'speech'.
 
-Both should just work if you use them.
+Both should "just work" if you use them.
+
+Cronjobs that offset the execution of each command.
+```
+0,10,20,30,40,50 * * * * node /opt/nmc2couch/src/nmc2couch.js >/dev/null 2>&1
+5,15,25,35,45,55 * * * * node /opt/nmc2couch/src/nmc2speech.js >/dev/null 2>&1
+```
+
+Once daily full reread
+```
+49 0 * * * node /opt/nmc2couch/src/nmc2couch.js --verify >/dev/null 2>&1
+4 0 * * * node /opt/nmc2couch/src/nmc2speech.js --verify >/dev/null 2>&1
+```
+
 
 ## Init
 
 ### Install
-
-You can install nmc2couch using Git:
+You probably want to install nmc2Couch in under `/opt/`.  You can install nmc2couch using Git:
 
 ```
 git clone https://github.com/indolering/nmc2couch.git
@@ -37,7 +49,7 @@ or via NPM (note the default config requirements):
 3. Couch your CouchDB install to ensure that all of the domains were copied over (there should be >100,000).
 4. Add the following cron job:
 
-`10	*	*	*	*	nodejs /home/ubuntu/nmc2couch/src/nmc2couch.js`
+`10	*	*	*	*	node /opt/nmc2couch/src/nmc2couch.js`
 
 This cron job will check the past 100 blocks every 10 minutes.  As a new block should be found ~10 minutes, this should
 ensure that your database is within one or two blocks of the current blockchain length.  100 blocks are checked in case 
