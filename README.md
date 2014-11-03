@@ -57,7 +57,16 @@ This cron job will check the past 100 blocks every 10 minutes.  As a new block s
 ensure that your database is within one or two blocks of the current blockchain length.  100 blocks are checked in case 
 your client was on a chain which was discarded.  100 blocks is total overkill and can be trimmed down to 10 or even 5 you are on a very slow machine.
 
-If you get a connection warning, check to make sure ~/.namecoin/namecoin.conf has the correct username settings and ensure that namecoind is running.
+### Troubleshooting
+Make sure ~/.namecoin/namecoin.conf has the correct username settings.
+
+```
+Possibly unhandled Error: connect ECONNREFUSED
+    at errnoException (net.js:901:11)
+    at Object.afterConnect [as oncomplete] (net.js:892:19)
+```
+
+Namecoind is not running.
 
 ### Authorization
 Namecoin and CouchDB should be run on an isolated instance with http and RPC access restricted to local network
