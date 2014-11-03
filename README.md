@@ -61,7 +61,7 @@ Now I'm just abusing this for storing my own setup notes.
 
 Setup replication from prive to public CouchDB 
 
-http://couchUser:couchPass@address:5984/speech
+http://couchUser:couchPass@lanAddress:5984/speech
 
 
 
