@@ -33,7 +33,7 @@ or via NPM (note the default config requirements):
 ### Setup
 
 1. Create a namecoin database in your CouchDB install.
-2. Run `nmc2couch.js --verify --debug` to init the database with all current domains.
+2. Run `node nmc2couch.js --verify --debug` to init the database with all current domains.
 3. Couch your CouchDB install to ensure that all of the domains were copied over (there should be >100,000).
 4. Add the following cron job:
 
