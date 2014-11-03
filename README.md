@@ -13,8 +13,9 @@ needs a major refactoring but here is the short version:
 
 Both should "just work" if you use them.
 
-Before setting up your crontab below, test commands by appending --debug.  If you get a connection warning, check to make su re ~/namecoin.conf has the correct username settings and ensure that namecoind is running.
+Before setting up your crontab below, test commands by appending --debug.
 
+Setup after installing couchdb and use couchdb's crontab: `crontab -e -u couchdb`.
 ```
 # Offset the execution of each batch.
 0,10,20,30,40,50 * * * * node /opt/nmc2couch/src/nmc2couch.js >/dev/null 2>&1
@@ -24,6 +25,8 @@ Before setting up your crontab below, test commands by appending --debug.  If yo
 49 0 * * * node /opt/nmc2couch/src/nmc2couch.js --verify >/dev/null 2>&1
 4 0 * * * node /opt/nmc2couch/src/nmc2speech.js --verify >/dev/null 2>&1
 ```
+
+
 
 ## Init
 
@@ -52,8 +55,9 @@ or via NPM (note the default config requirements):
 
 This cron job will check the past 100 blocks every 10 minutes.  As a new block should be found ~10 minutes, this should
 ensure that your database is within one or two blocks of the current blockchain length.  100 blocks are checked in case 
-your client was on a chain which was discarded.  100 blocks is total overkill and can be trimmed down if you are on a
-very slow machine.
+your client was on a chain which was discarded.  100 blocks is total overkill and can be trimmed down to 10 or even 5 you are on a very slow machine.
+
+If you get a connection warning, check to make sure ~/.namecoin/namecoin.conf has the correct username settings and ensure that namecoind is running.
 
 ### Authorization
 Namecoin and CouchDB should be run on an isolated instance with http and RPC access restricted to local network
