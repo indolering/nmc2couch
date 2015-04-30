@@ -15,7 +15,7 @@
     "couchdb"
   ],
   "author": "Indolering",
-  "license": "AGPLv3",
+  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/indolering/nmc2couch/issues"
   },
